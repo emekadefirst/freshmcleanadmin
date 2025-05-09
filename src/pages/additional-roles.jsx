@@ -29,10 +29,15 @@ const AdditionalRoles = () => {
 
   const fetchRoles = async () => {
     try {
-      const response = await axios.get(`${api}/extra`);
-      setRoles(response.data);  // Response is already in array form
+      const response = await axios.get(`${api}/extra/`);
+      setRoles(response.data);
     } catch (error) {
-      toast.error("Error fetching roles");
+      console.error("Error fetching roles:", error);
+      toast.error(
+        error.response?.data?.detail ||
+        error.message ||
+        "Error fetching roles"
+      );
     }
   };
 
@@ -45,30 +50,38 @@ const AdditionalRoles = () => {
     const updatedRole = editData[id];
 
     try {
-      const response = await axios.patch(`${api}/extra/${id}`, updatedRole);
-
+      const response = await axios.patch(`${api}/extra/${id}/`, updatedRole);
       if (response.status === 200) {
         toast.success("Role updated successfully");
         fetchRoles();
         setEditMode({ ...editMode, [id]: false });
       }
     } catch (error) {
-      toast.error("Error updating role");
+      console.error("Error updating role:", error);
+      toast.error(
+        error.response?.data?.detail ||
+        error.message ||
+        "Error updating role"
+      );
     }
   };
 
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
-      const response = await axios.delete(`${api}/extra/${roleToDelete}`);
-      
+      const response = await axios.delete(`${api}/extra/${roleToDelete}/`);
       if (response.status === 204) {
         toast.success("Role deleted successfully");
         fetchRoles();
         setShowDeleteModal(false);
       }
     } catch (error) {
-      toast.error("Error deleting role");
+      console.error("Error deleting role:", error);
+      toast.error(
+        error.response?.data?.detail ||
+        error.message ||
+        "Error deleting role"
+      );
     } finally {
       setIsDeleting(false);
     }
@@ -82,7 +95,7 @@ const AdditionalRoles = () => {
         name: newRole.roleName,
         price: Number(newRole.rolePrice)
       });
-      
+
       if (response.status === 201) {
         toast.success("Role created successfully");
         fetchRoles();
@@ -90,7 +103,12 @@ const AdditionalRoles = () => {
         setActiveTab("view");
       }
     } catch (error) {
-      toast.error("Error creating role");
+      console.error("Error creating role:", error);
+      toast.error(
+        error.response?.data?.detail ||
+        error.message ||
+        "Error creating role"
+      );
     } finally {
       setIsCreating(false);
     }
