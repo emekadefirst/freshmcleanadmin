@@ -13,7 +13,7 @@ const Services = () => {
     const [loading, setLoading] = useState(false);
     const [addLoading, setAddLoading] = useState(false);
     const [, setCurrentServiceId] = useState(null);
-    const api = import.meta.env.VITE_API_URL;
+    const api = import.meta.env.VITE_API_BASE_URL;
     const [formData, setFormData] = useState({
       name: "",
       type: "",

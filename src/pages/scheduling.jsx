@@ -17,11 +17,11 @@ const Scheduling = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   const { t } = useTranslation();
-
+  const api = import.meta.env.VITE_API_BASE_URL;
   const fetchOrders = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/bookings`, {
+      const response = await fetch(`${api}/bookings`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",

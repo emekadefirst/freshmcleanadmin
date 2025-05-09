@@ -17,7 +17,7 @@ const ServiceCategory = () => {
   const [selectedServiceCategory, setSelectedServiceCategory] = useState(null);
 
   const { t } = useTranslation();
-  const api = import.meta.env.VITE_API_URL;
+  const api = import.meta.env.VITE_API_BASE_URL;
 
   const openUpdateModal = (category) => {
     setSelectedServiceCategory(category);

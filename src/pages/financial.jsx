@@ -7,7 +7,7 @@ const FinancialManagement = () => {
   const [pricingData, setPricingData] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const api = import.meta.env.VITE_API_URL;
+  const api = import.meta.env.VITE_API_BASE_URL;
 
   const [formData, setFormData] = useState({
     priceName: "",

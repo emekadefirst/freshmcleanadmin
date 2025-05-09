@@ -15,7 +15,7 @@ const CleanerApplications = () => {
   const [selectedStatus, setSelectedStatus] = useState('Pending');
 
   const { t } = useTranslation();
-  const api = import.meta.env.VITE_API_URL;
+  const api = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
     fetchApplications();

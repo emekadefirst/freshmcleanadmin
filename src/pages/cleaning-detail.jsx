@@ -18,7 +18,7 @@ export default function CleaningDetail() {
           throw new Error('Booking ID is missing');
         }
         
-        const api = import.meta.env.VITE_API_URL;
+        const api = import.meta.env.VITE_API_BASE_URL;
         const response = await fetch(`${api}/bookings/${id}`);
         
         if (!response.ok) {

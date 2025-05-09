@@ -3,7 +3,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 
 const ContentManagement = () => {
-  const apiBase = import.meta.env.VITE_API_URL;
+  const apiBase = import.meta.env.VITE_API_BASE_URL;
 
   const [isCreating, setIsCreating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);

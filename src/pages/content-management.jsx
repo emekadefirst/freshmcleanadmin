@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import { Plus, Edit2, Trash2, Save, X, Image, MessageSquare, FileText, Tag, User } from "lucide-react";
 
 const ContentManagement = () => {
-  const apiBase = import.meta.env.VITE_API_URL;
+  const apiBase = import.meta.env.VITE_API_BASE_URL;
   
   // Resource configuration with proper content types and methods
   const resources = {

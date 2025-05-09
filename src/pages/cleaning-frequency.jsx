@@ -4,7 +4,7 @@ import { PlusCircle, Pencil, Trash2, Loader2, Save, X, RefreshCw } from 'lucide-
 // Schedule type interface
 const ScheduleManager = () => {
   // Define the API base URL
-  const api = import.meta.env.VITE_API_URL;
+  const api = import.meta.env.VITE_API_BASE_URL;
   
   // State management
   const [schedules, setSchedules] = useState([]);

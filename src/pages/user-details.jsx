@@ -14,7 +14,7 @@ const UserDetails = () => {
   const [editing, setEditing] = useState(false);
   const [editedUser, setEditedUser] = useState(null);
   const [saving, setSaving] = useState(false);
-  const api = import.meta.env.VITE_API_URL;
+  const api = import.meta.env.VITE_API_BASE_URL;
   const { t } = useTranslation();
 
   useEffect(() => {

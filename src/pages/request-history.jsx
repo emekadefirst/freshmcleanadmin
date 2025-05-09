@@ -4,7 +4,7 @@ import DataTable from "../components/ui/DataTable";
 const RequestHistory = () => {
   const [requests, setRequests] = useState([]);
   const token = localStorage.getItem("token");
-  const api = import.meta.env.VITE_API_URL;
+  const api = import.meta.env.VITE_API_BASE_URL;
 
   const fetchRequests = async () => {
     try {

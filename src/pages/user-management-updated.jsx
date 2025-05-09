@@ -28,7 +28,7 @@ const UserManagement = () => {
     password: ""
   });
   const itemsPerPage = 10;
-  const api = import.meta.env.VITE_API_URL;
+  const api = import.meta.env.VITE_API_BASE_URL;
 
   const { t } = useTranslation();
 

@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 
 // API URL from environment variables
-const api = import.meta.env.VITE_API_URL;
+const api = import.meta.env.VITE_API_BASE_URL;
 
 // Status badge configuration
 const statusConfig = {

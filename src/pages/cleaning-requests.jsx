@@ -21,7 +21,7 @@ const CleaningRequests = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   const { t } = useTranslation();
-  const api = import.meta.env.VITE_API_URL;
+  const api = import.meta.env.VITE_API_BASE_URL;
 
   const fetchOrders = async () => {
     try {
