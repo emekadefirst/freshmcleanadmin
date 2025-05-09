@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { toast, ToastContainer } from "react-toastify";
 import axios from "axios";
 
-const api = import.meta.env.VITE_API_URL;
+const api = "https://artificial-cherianne-emekadefirst-4fe958c5.koyeb.app";
 
 const AdditionalRoles = () => {
   const { t } = useTranslation();

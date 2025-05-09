@@ -16,11 +16,12 @@ const Dashboard = () => {
     const fetchData = async () => {
       try {
         const bookingRes = await axios.get(`${apiUrl}/bookings/`);
+        console.log(bookingRes);
         const bookingData = bookingRes.data || [];
 
         const usersRes = await axios.get(`${apiUrl}/auth/users/`);
         const usersData = usersRes.data || [];
-
+        console.log(usersData);
         const totalUsers = usersData.length;
         const totalRequests = bookingData.filter(b => b.payment_status === "Not Paid").length;
         const scheduledJobs = bookingData.filter(b => b.payment_status === "Paid" && b.status === "Not done").length;
