@@ -19,7 +19,7 @@ const AccountManagement = () => {
   });
   const [loading, setLoading] = useState(false);
   const { t, i18n } = useTranslation();
-  const api = import.meta.env.VITE_API_URL;
+  const api = "https://artificial-cherianne-emekadefirst-4fe958c5.koyeb.app";
 
   const changeLanguage = (lng) => {
     i18n.changeLanguage(lng);
@@ -30,14 +30,14 @@ const AccountManagement = () => {
     const accessToken = localStorage.getItem('access_token');
     if (accessToken) {
       try {
-        // Fetch user details from the 'auth/user' endpoint
         const response = await axios.get(`${api}/auth/user`, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
         });
 
-        const user = response.data;  // Assuming the response contains the user details
+        const user = response.data;
+   
         setFormData({
           id: user.id,
           first_name: user.first_name,
@@ -55,6 +55,7 @@ const AccountManagement = () => {
       }
     }
   };
+  
 
   // Handle form data input changes
   const handleInputChange = (e) => {
@@ -76,17 +77,7 @@ const AccountManagement = () => {
     try {
       const accessToken = localStorage.getItem('access_token');
       if (accessToken) {
-        // PATCH request to update user data (only send modified fields)
-        const response = await axios.patch(
-          `${api}/auth/users/${formData.id}`,
-          formData,
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }
-        );
-
+        const response = await axios.patch(`${api}/auth/users/admin/${formData.id}`, formData);
         if (response.status === 200) {
           toast.success("Profile updated successfully");
         }
@@ -104,7 +95,7 @@ const AccountManagement = () => {
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
       <ToastContainer />
-      
+
       <div className="flex items-center justify-between mb-8">
         <h2 className="text-3xl font-bold text-gray-800 tracking-tight">
           {t("accountManagementTitle")}
@@ -112,21 +103,19 @@ const AccountManagement = () => {
         <div className="flex items-center gap-3">
           <button
             onClick={() => changeLanguage("en")}
-            className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-              i18n.language === "en" 
-                ? "bg-indigo-600 text-white shadow-md" 
+            className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${i18n.language === "en"
+                ? "bg-indigo-600 text-white shadow-md"
                 : "bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200"
-            }`}
+              }`}
           >
             English (EN)
           </button>
           <button
             onClick={() => changeLanguage("de")}
-            className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-              i18n.language === "de" 
-                ? "bg-indigo-600 text-white shadow-md" 
+            className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${i18n.language === "de"
+                ? "bg-indigo-600 text-white shadow-md"
                 : "bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200"
-            }`}
+              }`}
           >
             German (DE)
           </button>
@@ -254,48 +243,45 @@ const AccountManagement = () => {
 
           <div className="mt-8 border-t border-gray-200 pt-6">
             <h4 className="text-lg font-medium text-gray-800 mb-4">Account Status</h4>
-            
+
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
               <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-gray-600">Cleaner Status</span>
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    formData.is_cleaner 
-                      ? 'bg-green-100 text-green-800' 
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${formData.is_cleaner
+                      ? 'bg-green-100 text-green-800'
                       : 'bg-gray-100 text-gray-800'
-                  }`}>
+                    }`}>
                     {formData.is_cleaner ? 'Active' : 'Inactive'}
                   </span>
                 </div>
               </div>
-              
+
               <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-gray-600">Admin Status</span>
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    formData.is_admin 
-                      ? 'bg-purple-100 text-purple-800' 
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${formData.is_admin
+                      ? 'bg-purple-100 text-purple-800'
                       : 'bg-gray-100 text-gray-800'
-                  }`}>
+                    }`}>
                     {formData.is_admin ? 'Admin' : 'User'}
                   </span>
                 </div>
               </div>
-              
+
               <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-gray-600">Verification</span>
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    formData.is_verified 
-                      ? 'bg-blue-100 text-blue-800' 
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${formData.is_verified
+                      ? 'bg-blue-100 text-blue-800'
                       : 'bg-yellow-100 text-yellow-800'
-                  }`}>
+                    }`}>
                     {formData.is_verified ? 'Verified' : 'Unverified'}
                   </span>
                 </div>
               </div>
             </div>
-            
+
             <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
                 <div className="flex items-center space-x-3">
@@ -308,7 +294,7 @@ const AccountManagement = () => {
                   {new Date(formData.created_at).toLocaleString()}
                 </p>
               </div>
-              
+
               <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
                 <div className="flex items-center space-x-3">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -70,7 +70,6 @@ const UserDetails = () => {
         last_name: editedUser.last_name || null,  // or lastname if that's what your backend expects
         username: editedUser.username || null,
         email: editedUser.email || null,
-        // Include other fields if needed:
         is_cleaner: Boolean(editedUser.is_cleaner),
         is_verified: Boolean(editedUser.is_verified)
       };
