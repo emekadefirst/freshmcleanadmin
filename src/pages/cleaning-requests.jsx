@@ -26,7 +26,7 @@ const CleaningRequests = () => {
   const fetchOrders = async () => {
     try {
       const token = localStorage.getItem("access_token");
-      const response = await fetch(`${api}/bookings`, {
+      const response = await fetch(`${api}/bookings/`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
