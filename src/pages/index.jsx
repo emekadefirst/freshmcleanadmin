@@ -19,7 +19,7 @@ const Dashboard = () => {
       try {
         const [bookingRes, usersRes] = await Promise.all([
           axios.get(`${apiUrl}/bookings/`),
-          axios.get(`${apiUrl}/auth/users/`)
+          axios.get(`${apiUrl}/auth/users`)
         ]);
 
         const bookingData = bookingRes.data || [];
