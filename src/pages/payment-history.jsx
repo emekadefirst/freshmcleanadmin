@@ -188,7 +188,7 @@ export default function PaymentManagement() {
 
   return (
     <div className="w-full bg-gray-50 min-h-screen">
-      <div className="container mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header with stats */}
         <div className="mb-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between">
@@ -322,6 +322,7 @@ export default function PaymentManagement() {
         
         {/* Payments table */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="overflow-x-auto max-w-full">
           {loading ? (
             <div className="p-12 flex flex-col items-center justify-center">
               <Loader2 className="h-8 w-8 text-blue-500 animate-spin mb-2" />
@@ -341,8 +342,7 @@ export default function PaymentManagement() {
             </div>
           ) : (
             <>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
+                <table className="w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
                       <th
@@ -473,7 +473,6 @@ export default function PaymentManagement() {
                     )}
                   </tbody>
                 </table>
-              </div>
               
               {/* Pagination */}
               {filteredPayments.length > itemsPerPage && (
@@ -528,6 +527,7 @@ export default function PaymentManagement() {
               )}
             </>
           )}
+          </div>
         </div>
       </div>
     </div>
