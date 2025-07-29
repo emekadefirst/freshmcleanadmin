@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import DataTable from "../components/ui/DataTable";
 import { useTranslation } from "react-i18next";
 import { Search, Filter, Calendar, User, CheckCircle, Clock, Euro, Building, Home } from "lucide-react";
+import { fetchSchedule } from "../services/schedule";
 
 const Scheduling = () => {
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const navigate = useNavigate();
 
   // Filter states
   const [serviceType, setServiceType] = useState("");
@@ -17,55 +20,19 @@ const Scheduling = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   const { t } = useTranslation();
-  const api = import.meta.env.VITE_API_BASE_URL;
-  const fetchOrders = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(`${api}/bookings`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      // Only set orders that have 'Paid' payment_status
-      const paidOrders = data.filter(order => order.payment_status === 'Paid');
-      setOrders(paidOrders);
-      setFilteredOrders(paidOrders);
-    } catch (error) {
-      console.error("Error fetching orders:", error);
-    }
-  };
-
+  
   useEffect(() => {
-    fetchOrders();
+    const loadSchedule = async () => {
+      const response = await fetchSchedule();
+      setOrders(response);
+      setFilteredOrders(response);
+    }
+    loadSchedule();
   }, []);
 
-  // Apply filters and search
-  useEffect(() => {
-    let filtered = [...orders];
-
-    if (serviceType) filtered = filtered.filter((o) => o.service_type === serviceType);
-    if (paymentStatus) filtered = filtered.filter((o) => o.payment_status === paymentStatus);
-    if (status) filtered = filtered.filter((o) => o.status === status);
-    if (scheduleType) filtered = filtered.filter((o) => o.schedule_type === scheduleType);
-    if (kitchenType) filtered = filtered.filter((o) => o.kitchen_type === kitchenType);
-
-    if (searchTerm.trim() !== "") {
-      const lowerSearch = searchTerm.toLowerCase();
-      filtered = filtered.filter((order) =>
-        JSON.stringify(order).toLowerCase().includes(lowerSearch)
-      );
-    }
-
-    setFilteredOrders(filtered);
-  }, [serviceType, paymentStatus, status, scheduleType, kitchenType, searchTerm, orders]);
+  const handleRowClick = (order) => {
+    navigate(`/cleaning-detail/${order.id}`);
+  };
 
   const resetFilters = () => {
     setServiceType("");
@@ -250,9 +217,10 @@ const Scheduling = () => {
               </div>
             </div>
             <DataTable 
-              data={filteredOrders} 
+              data={orders} 
               columns={columns} 
-              title="All Schedules" 
+              title="All Schedules"
+              onRowClick={handleRowClick}
             />
           </div>
         </div>

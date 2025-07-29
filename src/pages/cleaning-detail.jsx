@@ -4,6 +4,7 @@ import { Calendar, Clock, DollarSign, Home, MapPin, User, Clipboard, AlertCircle
 import { bookingService } from '../services/bookingService';
 import { userService } from '../services/userService';
 import { toast } from 'react-toastify';
+import { updateBookingStatus } from '../services/booking-status';
 
 export default function CleaningDetail() {
   const [booking, setBooking] = useState(null);
@@ -14,6 +15,7 @@ export default function CleaningDetail() {
   const [selectedCleaner, setSelectedCleaner] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [assigning, setAssigning] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -91,6 +93,27 @@ export default function CleaningDetail() {
     }
   };
 
+  // Handle status update
+  const handleStatusUpdate = async (newStatus) => {
+    setUpdatingStatus(true);
+    try {
+      const response = await updateBookingStatus(id, newStatus);
+      if (response.status === 200 || response.ok) {
+        // Reload the booking data
+        const updatedBooking = await bookingService.getById(id);
+        setBooking(updatedBooking);
+        toast.success('Status updated successfully');
+      } else {
+        toast.error('Failed to update status');
+      }
+    } catch (error) {
+      toast.error('Failed to update status');
+      console.error('Status update error:', error);
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
   // Filter cleaners based on search
   const filteredCleaners = cleaners.filter(cleaner =>
     `${cleaner.first_name} ${cleaner.last_name}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -155,14 +178,29 @@ export default function CleaningDetail() {
                 <h1 className="text-2xl font-bold text-white">Booking Details</h1>
                 <p className="text-blue-100">ID: {booking.id}</p>
               </div>
-              <div className="mt-4 md:mt-0">
+              <div className="mt-4 md:mt-0 flex items-center space-x-3">
                 <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
-                  booking.status === 'Done' ? 'bg-green-100 text-green-800' : 
+                  booking.status === 'Completed' ? 'bg-green-100 text-green-800' : 
                   booking.status === 'In Progress' ? 'bg-yellow-100 text-yellow-800' : 
-                  'bg-red-100 text-red-800'
+                  booking.status === 'Cancelled' ? 'bg-red-100 text-red-800' :
+                  'bg-gray-100 text-gray-800'
                 }`}>
                   {booking.status}
                 </span>
+                <select
+                  value={booking.status}
+                  onChange={(e) => handleStatusUpdate(e.target.value)}
+                  disabled={updatingStatus}
+                  className="bg-white border border-gray-300 rounded-lg px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
+                >
+                  <option value="Not done">Not done</option>
+                  <option value="In progress">In Progress</option>
+                  <option value="Completed">Completed</option>
+                  <option value="Cancelled">Cancelled</option>
+                </select>
+                {updatingStatus && (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                )}
               </div>
             </div>
           </div>

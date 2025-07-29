@@ -11,10 +11,9 @@ export const bookingService = {
 
   // Assign cleaner to booking
   assignCleaner: async (id, cleanerId) => {
-    const response = await axios.patch(`${API_URL}/bookings/${id}`, {
-      cleaner_id: cleanerId,
-      status: "In Progress"
-    });
+    const data = { cleaner_id: cleanerId }
+    console.log("Cleaner ID", cleanerId)
+    const response = await axios.patch(`${API_URL}/bookings/${id}`, data);
     return response.data;
   }
 };
