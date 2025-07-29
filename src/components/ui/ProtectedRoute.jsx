@@ -1,10 +1,16 @@
 import { Navigate, useLocation, Outlet } from "react-router-dom";
-import { useAuthStore } from "../../store/authStore";
+import { useAuth } from "../../contexts/AuthContext";
 
 // eslint-disable-next-line react/prop-types
 const ProtectedRoute = ({ children }) => {
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const { isAuthenticated, loading } = useAuth();
   const location = useLocation();
+
+  if (loading) {
+    return <div className="flex items-center justify-center min-h-screen">
+      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+    </div>;
+  }
 
   if (!isAuthenticated) {
     return <Navigate to="/auth/login" state={{ from: location }} replace />;

@@ -38,12 +38,12 @@ export const navigationItems = [
     label: "Additional Roles",
     translationKey: "additionalRolesTitle"
   },
-  // {
-  //   to: "/content-management",
-  //   icon: FaFileAlt,
-  //   label: "Content Management",
-  //   translationKey: "contentManagementTitle"
-  // },
+  {
+    to: "/content-management",
+    icon: FaFileAlt,
+    label: "Content Management",
+    translationKey: "contentManagementTitle"
+  },
   {
     to: "/transactions",
     icon: BsCashCoin,
@@ -81,7 +81,7 @@ export const navigationItems = [
   // },
   {
     to: "/cleaner-application",
-    icon: FaFileAlt,
+    icon: FaBriefcase,
     label: "Cleaner Application",
     translationKey: "cleanerApplication"
   },

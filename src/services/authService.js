@@ -36,6 +36,38 @@ export const authService = {
     }
   },
 
+  refreshToken: async () => {
+    try {
+      const refresh_token = localStorage.getItem('refresh_token');
+      if (!refresh_token) {
+        throw new Error('No refresh token available');
+      }
+
+      // Remove auth header temporarily to avoid interceptor loops
+      const originalAuth = axios.defaults.headers.common['Authorization'];
+      delete axios.defaults.headers.common['Authorization'];
+
+      const response = await axios.post(`${API_URL}/auth/refresh-token`, {
+        token: refresh_token
+      });
+
+      const { access_token } = response.data;
+      
+      // Update stored token
+      localStorage.setItem('access_token', access_token);
+      axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
+
+      return access_token;
+    } catch (error) {
+      console.error('Refresh token failed:', error);
+      // If refresh fails, clear tokens
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      delete axios.defaults.headers.common['Authorization'];
+      throw error;
+    }
+  },
+
   signup: async (formData) => {
     try {
       const response = await axios.post(`${API_URL}/createAdmin`, formData);

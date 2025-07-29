@@ -21,10 +21,12 @@ import ScheduleManager from './pages/cleaning-frequency.jsx';
 import ContentManagement from './pages/content-management.jsx';
 import PaymentHistory from './pages/payment-history.jsx';
 import ProtectedRoute from './components/ui/ProtectedRoute.jsx';
+import { AuthProvider } from './contexts/AuthContext.jsx';
 
 function App() {
   return (
     <BrowserRouter>
+      <AuthProvider>
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Navigate to="/auth/login" replace />} />
@@ -57,7 +59,8 @@ function App() {
           <Route path="/cleaning-frequency" element={<ScheduleManager />} />
           <Route path="/content-management" element={<ContentManagement />} />
         </Route>
-      </Routes>
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
   );
 }
