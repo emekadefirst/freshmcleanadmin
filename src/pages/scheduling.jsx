@@ -3,10 +3,10 @@ import { useNavigate } from "react-router-dom";
 import DataTable from "../components/ui/DataTable";
 import { useTranslation } from "react-i18next";
 import { Search, Filter, Calendar, User, CheckCircle, Clock, Euro, Building, Home } from "lucide-react";
-import { fetchSchedule } from "../services/schedule";
+import { useBookingStore } from "../store/bookingStore";
 
 const Scheduling = () => {
-  const [orders, setOrders] = useState([]);
+  const { bookings, loading, fetchBookings, getScheduleBookings } = useBookingStore();
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const navigate = useNavigate();
@@ -22,13 +22,13 @@ const Scheduling = () => {
   const { t } = useTranslation();
   
   useEffect(() => {
-    const loadSchedule = async () => {
-      const response = await fetchSchedule();
-      setOrders(response);
-      setFilteredOrders(response);
-    }
-    loadSchedule();
-  }, []);
+    fetchBookings();
+  }, [fetchBookings]);
+
+  useEffect(() => {
+    const scheduleOrders = getScheduleBookings();
+    setFilteredOrders(scheduleOrders);
+  }, [bookings, getScheduleBookings]);
 
   const handleRowClick = (order) => {
     navigate(`/cleaning-detail/${order.id}`);
@@ -213,11 +213,11 @@ const Scheduling = () => {
           <div className="bg-white rounded-lg overflow-hidden">
             <div className="flex items-center justify-between mb-2">
               <div className="text-sm text-gray-500">
-                Showing {filteredOrders.length} of {orders.length} requests
+                Showing {filteredOrders.length} of {getScheduleBookings().length} requests
               </div>
             </div>
             <DataTable 
-              data={orders} 
+              data={filteredOrders} 
               columns={columns} 
               title="All Schedules"
               onRowClick={handleRowClick}

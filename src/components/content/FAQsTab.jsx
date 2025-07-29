@@ -44,7 +44,6 @@ const FAQsTab = () => {
       setFormData({ title: "", category: "", content: "" });
     } catch (error) {
       toast.error("Failed to save FAQ");
-      console.error("FAQ save error:", error);
     } finally {
       setSubmitting(false);
     }

@@ -6,9 +6,10 @@ import {
   Clock, Euro, Building, Home
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useBookingStore } from "../store/bookingStore";
 
 const CleaningRequests = () => {
-  const [orders, setOrders] = useState([]);
+  const { bookings, loading, fetchBookings, getAllBookings } = useBookingStore();
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const navigate = useNavigate();
@@ -21,32 +22,18 @@ const CleaningRequests = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   const { t } = useTranslation();
-  const api = import.meta.env.VITE_API_BASE_URL;
-
-  const fetchOrders = async () => {
-    try {
-      const token = localStorage.getItem("access_token");
-      const response = await fetch(`${api}/bookings/`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-      const data = await response.json();
-      setOrders(data);
-      setFilteredOrders(data);
-    } catch (error) {
-    }
-  };
 
   useEffect(() => {
-    fetchOrders();
-  }, []);
+    fetchBookings();
+  }, [fetchBookings]);
 
   useEffect(() => {
+    const orders = getAllBookings();
+    setFilteredOrders(orders);
+  }, [bookings, getAllBookings]);
+
+  useEffect(() => {
+    const orders = getAllBookings();
     let filtered = [...orders];
 
     if (serviceType) filtered = filtered.filter((o) => o.service_type === serviceType);
@@ -63,7 +50,7 @@ const CleaningRequests = () => {
     }
 
     setFilteredOrders(filtered);
-  }, [serviceType, paymentStatus, status, scheduleType, kitchenType, searchTerm, orders]);
+  }, [serviceType, paymentStatus, status, scheduleType, kitchenType, searchTerm, bookings, getAllBookings]);
 
   const resetFilters = () => {
     setServiceType("");
@@ -88,8 +75,6 @@ const CleaningRequests = () => {
     // Ensure the id is properly extracted and used in the navigation
     const orderId = order.id;
     if (orderId) {
-      // Log the navigation attempt for debugging
-      console.log(`Navigating to: /cleaning-detail/${orderId}`);
       navigate(`/cleaning-detail/${orderId}`);
     } else {
       console.error("Order ID is undefined or null", order);

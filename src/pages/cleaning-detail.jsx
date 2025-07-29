@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Calendar, Clock, DollarSign, Home, MapPin, User, Clipboard, AlertCircle, UserPlus, Search } from 'lucide-react';
+import SearchableSelect from '../components/ui/SearchableSelect';
 import { bookingService } from '../services/bookingService';
 import { userService } from '../services/userService';
 import { toast } from 'react-toastify';
@@ -79,15 +80,15 @@ export default function CleaningDetail() {
 
     setAssigning(true);
     try {
-      const updatedBooking = await bookingService.assignCleaner(id, selectedCleaner);
+      await bookingService.assignCleaner(id, selectedCleaner);
+      // Reload booking data to ensure consistency
+      const updatedBooking = await bookingService.getById(id);
       setBooking(updatedBooking);
       setShowAssignModal(false);
       setSelectedCleaner('');
-      setSearchQuery('');
       toast.success('Cleaner assigned successfully');
     } catch (error) {
       toast.error('Failed to assign cleaner');
-      console.error('Assignment error:', error);
     } finally {
       setAssigning(false);
     }
@@ -95,20 +96,28 @@ export default function CleaningDetail() {
 
   // Handle status update
   const handleStatusUpdate = async (newStatus) => {
+    if (newStatus === booking.status) return; // No change needed
+    
+    console.log('Updating status from', booking.status, 'to', newStatus);
     setUpdatingStatus(true);
     try {
       const response = await updateBookingStatus(id, newStatus);
-      if (response.status === 200 || response.ok) {
-        // Reload the booking data
+      console.log('Status update response:', response);
+      
+      // Check if update was successful
+      if (response === 200 || response >= 200 && response < 300) {
+        // Reload the booking data after successful update
         const updatedBooking = await bookingService.getById(id);
+        console.log('Updated booking data:', updatedBooking);
         setBooking(updatedBooking);
         toast.success('Status updated successfully');
       } else {
+        console.error('Status update failed with response:', response);
         toast.error('Failed to update status');
       }
     } catch (error) {
-      toast.error('Failed to update status');
       console.error('Status update error:', error);
+      toast.error('Failed to update status');
     } finally {
       setUpdatingStatus(false);
     }
@@ -194,7 +203,7 @@ export default function CleaningDetail() {
                   className="bg-white border border-gray-300 rounded-lg px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
                 >
                   <option value="Not done">Not done</option>
-                  <option value="In progress">In Progress</option>
+                  <option value="In Progress">In Progress</option>
                   <option value="Completed">Completed</option>
                   <option value="Cancelled">Cancelled</option>
                 </select>
@@ -214,15 +223,13 @@ export default function CleaningDetail() {
                   <User className="w-5 h-5 mr-2 text-blue-500" />
                   Client Information
                 </h2>
-                {!booking.cleaner && (
-                  <button
-                    onClick={() => setShowAssignModal(true)}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2"
-                  >
-                    <UserPlus className="h-4 w-4" />
-                    <span>Assign Cleaner</span>
-                  </button>
-                )}
+                <button
+                  onClick={() => setShowAssignModal(true)}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2"
+                >
+                  <UserPlus className="h-4 w-4" />
+                  <span>{booking.cleaner ? 'Reassign Cleaner' : 'Assign Cleaner'}</span>
+                </button>
               </div>
               <div className="bg-gray-50 p-4 rounded-lg">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -402,12 +409,11 @@ export default function CleaningDetail() {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 w-full max-w-md">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">Assign Cleaner</h2>
+                <h2 className="text-xl font-semibold">{booking.cleaner ? 'Reassign Cleaner' : 'Assign Cleaner'}</h2>
                 <button
                   onClick={() => {
                     setShowAssignModal(false);
                     setSelectedCleaner('');
-                    setSearchQuery('');
                   }}
                   className="text-gray-400 hover:text-gray-600"
                 >
@@ -418,36 +424,18 @@ export default function CleaningDetail() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Search Cleaners
-                  </label>
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                    <input
-                      type="text"
-                      placeholder="Search by name or email..."
-                      className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                  </div>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Select Cleaner
                   </label>
-                  <select
+                  <SearchableSelect
+                    options={cleaners.map(cleaner => ({
+                      value: cleaner.id,
+                      label: `${cleaner.first_name} ${cleaner.last_name} - ${cleaner.email}`
+                    }))}
                     value={selectedCleaner}
-                    onChange={(e) => setSelectedCleaner(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="">Choose a cleaner...</option>
-                    {filteredCleaners.map((cleaner) => (
-                      <option key={cleaner.id} value={cleaner.id}>
-                        {cleaner.first_name} {cleaner.last_name} - {cleaner.email}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={setSelectedCleaner}
+                    placeholder="Choose a cleaner..."
+                    searchPlaceholder="Search by name or email..."
+                  />
                 </div>
               </div>
               
@@ -470,7 +458,6 @@ export default function CleaningDetail() {
                   onClick={() => {
                     setShowAssignModal(false);
                     setSelectedCleaner('');
-                    setSearchQuery('');
                   }}
                   disabled={assigning}
                   className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"

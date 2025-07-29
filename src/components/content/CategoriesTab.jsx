@@ -38,7 +38,6 @@ const CategoriesTab = () => {
       setFormData({ name: '' });
     } catch (error) {
       toast.error('Failed to save category');
-      console.error('Category save error:', error);
     } finally {
       setSubmitting(false);
     }

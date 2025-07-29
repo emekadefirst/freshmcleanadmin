@@ -46,7 +46,6 @@ const BlogsTab = () => {
       setFormData({ title: "", category: "", content: "", image: "" });
     } catch (error) {
       toast.error("Failed to save blog");
-      console.error("Blog save error:", error);
     } finally {
       setSubmitting(false);
     }
@@ -129,7 +128,6 @@ const BlogsTab = () => {
       toast.success('Image uploaded successfully');
     } catch (error) {
       toast.error('Failed to upload image');
-      console.error('Upload error:', error);
     } finally {
       setUploading(false);
     }
