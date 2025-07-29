@@ -1,16 +1,24 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Calendar, Clock, DollarSign, Home, MapPin, User, Clipboard, AlertCircle } from 'lucide-react';
+import { Calendar, Clock, DollarSign, Home, MapPin, User, Clipboard, AlertCircle, UserPlus, Search } from 'lucide-react';
+import { bookingService } from '../services/bookingService';
+import { userService } from '../services/userService';
+import { toast } from 'react-toastify';
 
 export default function CleaningDetail() {
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { id } = useParams(); // Get the ID from URL path parameters
-  const navigate = useNavigate(); // For navigation
+  const [cleaners, setCleaners] = useState([]);
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [selectedCleaner, setSelectedCleaner] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [assigning, setAssigning] = useState(false);
+  const { id } = useParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchBookingDetails = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
         
@@ -18,15 +26,13 @@ export default function CleaningDetail() {
           throw new Error('Booking ID is missing');
         }
         
-        const api = import.meta.env.VITE_API_BASE_URL;
-        const response = await fetch(`${api}/bookings/${id}`);
+        const [bookingData, cleanersData] = await Promise.all([
+          bookingService.getById(id),
+          userService.getCleaners()
+        ]);
         
-        if (!response.ok) {
-          throw new Error('Failed to fetch booking details');
-        }
-        
-        const data = await response.json();
-        setBooking(data);
+        setBooking(bookingData);
+        setCleaners(cleanersData);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -34,7 +40,7 @@ export default function CleaningDetail() {
       }
     };
     
-    fetchBookingDetails();
+    fetchData();
   }, [id]);
 
   // Helper function to format date
@@ -59,8 +65,37 @@ export default function CleaningDetail() {
 
   // Handle back button click
   const handleBack = () => {
-    navigate(-1); // Go back to previous page
+    navigate(-1);
   };
+
+  // Handle assign cleaner
+  const handleAssignCleaner = async () => {
+    if (!selectedCleaner) {
+      toast.error('Please select a cleaner');
+      return;
+    }
+
+    setAssigning(true);
+    try {
+      const updatedBooking = await bookingService.assignCleaner(id, selectedCleaner);
+      setBooking(updatedBooking);
+      setShowAssignModal(false);
+      setSelectedCleaner('');
+      setSearchQuery('');
+      toast.success('Cleaner assigned successfully');
+    } catch (error) {
+      toast.error('Failed to assign cleaner');
+      console.error('Assignment error:', error);
+    } finally {
+      setAssigning(false);
+    }
+  };
+
+  // Filter cleaners based on search
+  const filteredCleaners = cleaners.filter(cleaner =>
+    `${cleaner.first_name} ${cleaner.last_name}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    cleaner.email.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   if (loading) {
     return (
@@ -136,20 +171,36 @@ export default function CleaningDetail() {
           <div className="p-6">
             {/* Client Information */}
             <div className="mb-8">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-                <User className="w-5 h-5 mr-2 text-blue-500" />
-                Client Information
-              </h2>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold text-gray-800 flex items-center">
+                  <User className="w-5 h-5 mr-2 text-blue-500" />
+                  Client Information
+                </h2>
+                {!booking.cleaner && (
+                  <button
+                    onClick={() => setShowAssignModal(true)}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2"
+                  >
+                    <UserPlus className="h-4 w-4" />
+                    <span>Assign Cleaner</span>
+                  </button>
+                )}
+              </div>
               <div className="bg-gray-50 p-4 rounded-lg">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <p className="text-sm text-gray-500">Client Name</p>
                     <p className="font-medium text-gray-800">{booking.client}</p>
                   </div>
-                  {booking.cleaner && (
+                  {booking.cleaner ? (
                     <div>
                       <p className="text-sm text-gray-500">Assigned Cleaner</p>
                       <p className="font-medium text-gray-800">{booking.cleaner}</p>
+                    </div>
+                  ) : (
+                    <div>
+                      <p className="text-sm text-gray-500">Assigned Cleaner</p>
+                      <p className="font-medium text-orange-600">Not assigned yet</p>
                     </div>
                   )}
                 </div>
@@ -307,6 +358,91 @@ export default function CleaningDetail() {
             </div>
           </div>
         </div>
+
+        {/* Assign Cleaner Modal */}
+        {showAssignModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">Assign Cleaner</h2>
+                <button
+                  onClick={() => {
+                    setShowAssignModal(false);
+                    setSelectedCleaner('');
+                    setSearchQuery('');
+                  }}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <AlertCircle className="h-5 w-5" />
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Search Cleaners
+                  </label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <input
+                      type="text"
+                      placeholder="Search by name or email..."
+                      className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Select Cleaner
+                  </label>
+                  <select
+                    value={selectedCleaner}
+                    onChange={(e) => setSelectedCleaner(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">Choose a cleaner...</option>
+                    {filteredCleaners.map((cleaner) => (
+                      <option key={cleaner.id} value={cleaner.id}>
+                        {cleaner.first_name} {cleaner.last_name} - {cleaner.email}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              
+              <div className="flex space-x-3 pt-6">
+                <button
+                  onClick={handleAssignCleaner}
+                  disabled={assigning || !selectedCleaner}
+                  className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                >
+                  {assigning ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Assigning...
+                    </>
+                  ) : (
+                    'Assign Cleaner'
+                  )}
+                </button>
+                <button
+                  onClick={() => {
+                    setShowAssignModal(false);
+                    setSelectedCleaner('');
+                    setSearchQuery('');
+                  }}
+                  disabled={assigning}
+                  className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
