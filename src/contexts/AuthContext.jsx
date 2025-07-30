@@ -19,6 +19,7 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showRefreshModal, setShowRefreshModal] = useState(false);
   const navigate = useNavigate();
 
   // Initialize auth state on app load
@@ -103,44 +104,36 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(false);
   };
 
-  // Setup axios interceptor for automatic token refresh
+  // Listen for refresh events from axios interceptor
   useEffect(() => {
-    const interceptor = axios.interceptors.response.use(
-      (response) => response,
-      async (error) => {
-        const originalRequest = error.config;
-        
-        // Only attempt refresh for authenticated users and avoid refresh loops
-        if (error.response?.status === 401 && 
-            !originalRequest._retry && 
-            !isRefreshing && 
-            isAuthenticated &&
-            originalRequest.url !== `${import.meta.env.VITE_API_BASE_URL}/auth/refresh-token`) {
-          
-          originalRequest._retry = true;
-          setIsRefreshing(true);
-          
-          try {
-            await authService.refreshToken();
-            originalRequest.headers['Authorization'] = `Bearer ${localStorage.getItem('access_token')}`;
-            setIsRefreshing(false);
-            return axios.request(originalRequest);
-          } catch (refreshError) {
-            setIsRefreshing(false);
-            console.error('Token refresh failed in interceptor:', refreshError);
-            clearAuth();
-            navigate('/auth/login', { replace: true });
-            return Promise.reject(refreshError);
-          }
-        }
-        return Promise.reject(error);
-      }
-    );
-
-    return () => {
-      axios.interceptors.response.eject(interceptor);
+    const handleRefreshStart = () => {
+      setIsRefreshing(true);
+      setShowRefreshModal(true);
     };
-  }, [navigate, isRefreshing, isAuthenticated]);
+    
+    const handleRefreshEnd = () => {
+      setIsRefreshing(false);
+      setShowRefreshModal(false);
+    };
+    
+    const handleRefreshError = () => {
+      setIsRefreshing(false);
+      setShowRefreshModal(false);
+      clearAuth();
+      toast.error('Session expired. Please login again.');
+      navigate('/auth/login', { replace: true });
+    };
+    
+    window.addEventListener('token-refresh-start', handleRefreshStart);
+    window.addEventListener('token-refresh-end', handleRefreshEnd);
+    window.addEventListener('token-refresh-error', handleRefreshError);
+    
+    return () => {
+      window.removeEventListener('token-refresh-start', handleRefreshStart);
+      window.removeEventListener('token-refresh-end', handleRefreshEnd);
+      window.removeEventListener('token-refresh-error', handleRefreshError);
+    };
+  }, [navigate]);
 
   const value = {
     user,
@@ -155,6 +148,19 @@ export const AuthProvider = ({ children }) => {
   return (
     <AuthContext.Provider value={value}>
       {children}
+      
+      {/* Refresh Token Modal */}
+      {showRefreshModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-sm">
+            <div className="text-center">
+              <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <h2 className="text-lg font-semibold text-gray-800 mb-2">Refreshing Session</h2>
+              <p className="text-gray-600">Please wait while we refresh your session...</p>
+            </div>
+          </div>
+        </div>
+      )}
     </AuthContext.Provider>
   );
 };

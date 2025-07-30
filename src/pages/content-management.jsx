@@ -5,6 +5,7 @@ import CategoriesTab from '../components/content/CategoriesTab';
 import BlogsTab from '../components/content/BlogsTab';
 import TestimoniesTab from '../components/content/TestimoniesTab';
 import SubscribersTab from '../components/content/SubscribersTab';
+import CouponsTab from '../components/content/CouponsTab';
 
 const ContentManagement = () => {
   const [activeTab, setActiveTab] = useState('faqs');
@@ -14,7 +15,8 @@ const ContentManagement = () => {
     { id: 'categories', label: 'Categories', count: 0 },
     { id: 'blogs', label: 'Blogs', count: 0 },
     { id: 'testimonies', label: 'Testimonies', count: 0 },
-    { id: 'subscribers', label: 'Subscribers', count: 0 }
+    { id: 'subscribers', label: 'Subscribers', count: 0 },
+    { id: 'coupons', label: 'Coupons', count: 0 }
   ];
 
   const renderTabContent = () => {
@@ -29,6 +31,8 @@ const ContentManagement = () => {
         return <TestimoniesTab />;
       case 'subscribers':
         return <SubscribersTab />;
+      case 'coupons':
+        return <CouponsTab />;
       default:
         return <FAQsTab />;
     }
