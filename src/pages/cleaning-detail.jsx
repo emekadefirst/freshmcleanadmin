@@ -4,7 +4,7 @@ import { Calendar, Clock, DollarSign, Home, MapPin, User, Clipboard, AlertCircle
 import SearchableSelect from '../components/ui/SearchableSelect';
 import { bookingService } from '../services/bookingService';
 import { userService } from '../services/userService';
-import { toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 import { updateBookingStatus } from '../services/booking-status';
 
 export default function CleaningDetail() {
@@ -81,9 +81,11 @@ export default function CleaningDetail() {
     setAssigning(true);
     try {
       await bookingService.assignCleaner(id, selectedCleaner);
-      // Reload booking data to ensure consistency
+      
+      // Soft reload by refetching booking data
       const updatedBooking = await bookingService.getById(id);
       setBooking(updatedBooking);
+      
       setShowAssignModal(false);
       setSelectedCleaner('');
       toast.success('Cleaner assigned successfully');
@@ -98,25 +100,20 @@ export default function CleaningDetail() {
   const handleStatusUpdate = async (newStatus) => {
     if (newStatus === booking.status) return; // No change needed
     
-    console.log('Updating status from', booking.status, 'to', newStatus);
     setUpdatingStatus(true);
     try {
       const response = await updateBookingStatus(id, newStatus);
-      console.log('Status update response:', response);
       
       // Check if update was successful
-      if (response === 200 || response >= 200 && response < 300) {
-        // Reload the booking data after successful update
+      if (response >= 200 && response < 300) {
+        // Soft reload by refetching booking data
         const updatedBooking = await bookingService.getById(id);
-        console.log('Updated booking data:', updatedBooking);
         setBooking(updatedBooking);
         toast.success('Status updated successfully');
       } else {
-        console.error('Status update failed with response:', response);
         toast.error('Failed to update status');
       }
     } catch (error) {
-      console.error('Status update error:', error);
       toast.error('Failed to update status');
     } finally {
       setUpdatingStatus(false);
@@ -178,6 +175,7 @@ export default function CleaningDetail() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
+      <ToastContainer />
       <div className="container mx-auto px-4 py-8">
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
           {/* Header */}
@@ -203,7 +201,7 @@ export default function CleaningDetail() {
                   className="bg-white border border-gray-300 rounded-lg px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
                 >
                   <option value="Not done">Not done</option>
-                  <option value="In Progress">In Progress</option>
+                  <option value="In progress">In Progress</option>
                   <option value="Completed">Completed</option>
                   <option value="Cancelled">Cancelled</option>
                 </select>
