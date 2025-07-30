@@ -22,11 +22,13 @@ import ContentManagement from './pages/content-management.jsx';
 import PaymentHistory from './pages/payment-history.jsx';
 import ProtectedRoute from './components/ui/ProtectedRoute.jsx';
 import { AuthProvider } from './contexts/AuthContext.jsx';
+import { ToastContainer } from 'react-toastify';
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+      <ToastContainer />
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Navigate to="/auth/login" replace />} />

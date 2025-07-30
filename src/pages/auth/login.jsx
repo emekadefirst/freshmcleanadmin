@@ -1,12 +1,43 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Logo from "/assets/fresh-logo.png";
 import AuthTemplate from "../../components/AuthTemplate";
 import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import LoginForm from "../../components/auth/LoginForm";
+import axios from "axios";
 
 const LoginPage = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      const token = localStorage.getItem('access_token');
+      if (token) {
+        try {
+          // Set axios header
+          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+          
+          // Verify token with API
+          const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/auth/user`);
+          const userData = response.data;
+          
+          // If user is admin and token is valid, redirect to dashboard
+          if (userData.is_admin) {
+            navigate('/dashboard', { replace: true });
+          }
+        } catch (error) {
+          // Token is invalid, clear it
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('refresh_token');
+          delete axios.defaults.headers.common['Authorization'];
+        }
+      }
+    };
+
+    checkAuthStatus();
+  }, [navigate]);
+
   return (
     <>
       <ToastContainer />

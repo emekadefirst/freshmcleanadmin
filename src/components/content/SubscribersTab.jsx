@@ -31,7 +31,6 @@ const SubscribersTab = () => {
       setFormData({ email: '' });
     } catch (error) {
       toast.error('Failed to add subscriber');
-      console.error('Subscriber save error:', error);
     } finally {
       setSubmitting(false);
     }
